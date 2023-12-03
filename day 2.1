@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+int seek(char* str, char* word) {
+  char* ptr;
+  char tmp[3];
+  tmp[2] = '\0';
+  int res = 0;
+  ptr = strtok (str, ";");
+  while (ptr != NULL) {
+    //printf("%s\n", ptr);
+    if (strstr(ptr, word) != NULL) {
+      tmp[0] = strstr(ptr, word)[-3];
+      tmp[1] = strstr(ptr, word)[-2];
+      res = (atoi(tmp) > res) ? atoi(tmp) : res;
+    }
+    ptr = strtok(NULL, ";");
+  }
+  return res;
+}
+
+int main(void) {
+  FILE *readFile;
+  readFile = fopen("input.txt", "r");
+  char* segment = NULL;
+  size_t segment_size = 0;
+  int sum = 0;
+  int j = 1;
+  int fail = 0;
+  
+  while (getline(&segment, &segment_size, readFile) != -1) {
+    char tmp[256];
+    strcpy(tmp, segment);
+    if (seek(tmp, "blue") > 14) {
+      fail++;
+    }
+    strcpy(tmp, segment);
+    if (seek(tmp, "green") > 13) {
+      fail++;
+    }
+    strcpy(tmp, segment);
+    if (seek(tmp, "red") > 12) {
+      fail++;
+    }
+    if (fail > 0) {
+      sum += 0;
+    }
+    else {
+      sum += j;
+    }
+    j++;
+    fail = 0;
+  }
+
+  printf("||%d||\n", sum);
+}
