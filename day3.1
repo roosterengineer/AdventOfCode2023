@@ -1,0 +1,139 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+int sum = 0;
+int count = 0;
+
+typedef struct Map_struct {
+  int next_j;
+  int value;
+  int start;
+  int end;
+  int row_num;
+} Map;
+
+
+Map fetch_num(char* str, int row, int col) {
+  Map tmp;
+  char build_int[8];
+  int m = 0;
+  while(isdigit(str[col]) > 0) {
+    build_int[m] = str[col];
+    col++;
+    m++;
+  }
+  build_int[m] = '\0';
+  tmp.value = atoi(build_int);
+  tmp.next_j = col;
+  tmp.row_num = row;
+  tmp.end = col -1;
+  tmp.start = col - strlen(build_int);
+  return tmp; // returns end of number
+}
+
+
+int main(void) {
+  FILE *readFile;
+  readFile = fopen("input.txt", "r");
+  char* segment = NULL;
+  size_t segment_size = 0;
+
+  int i, j;
+
+  while (getline(&segment, &segment_size, readFile) != -1) {
+    count++;
+  }
+
+  rewind(readFile);
+
+  char* sch[count];
+  
+  for (i = 0; i < count; i++) {
+    getline(&segment, &segment_size, readFile);
+    sch[i] = (char*)malloc(strlen(segment) + 1);
+    strcpy(sch[i], segment);
+  }
+
+
+  // code
+  Map tmp;
+  int a, b;
+  for (i = 0; i < count; i++) {
+    for (j = 0; j < strlen(sch[i]); j++) {
+      if (isdigit(sch[i][j]) > 0) {
+        tmp = fetch_num(sch[i],i,j);
+        for (a = 0; a < count; a++) {
+          for (b = 0; b < strlen(sch[a]); b++) {
+            if (strchr("*@$%#+-/=", sch[a][b]) != NULL) {
+              int spc_xy_x = a;
+              int spc_xy_y = b;
+              int num_xy_x = tmp.row_num;
+              int num_xy_start_y = tmp.start;
+              int num_xy_end_y = tmp.end;
+              if (spc_xy_x - 1 >= 0 && spc_xy_x + 1 <= count) {
+                if (spc_xy_y - 1 >= 0 && spc_xy_y + 1 <= strlen(sch[a])) {
+                  if ((spc_xy_y >= num_xy_start_y - 1 && spc_xy_y <= num_xy_end_y + 1) &&
+                      (spc_xy_x >= num_xy_x - 1 && spc_xy_x <= num_xy_x + 1)) {
+                    sum += tmp.value;
+                  }
+                }
+              }
+              else if (spc_xy_x == 0) {
+                if (spc_xy_y - 1 >= 0 && spc_xy_y + 1 <= strlen(sch[a])) {
+                  if ((spc_xy_y >= num_xy_start_y - 1 && spc_xy_y <= num_xy_end_y + 1) &&
+                      (spc_xy_x >= num_xy_x && spc_xy_x <= num_xy_x + 1)) {
+                    sum += tmp.value;
+                  }
+                }
+                else if (spc_xy_y == 0){
+                  if ((spc_xy_y >= num_xy_start_y && spc_xy_y <= num_xy_end_y + 1) &&
+                      (spc_xy_x >= num_xy_x && spc_xy_x <= num_xy_x + 1)) {
+                    sum += tmp.value;
+                  }
+                }
+                else if (spc_xy_y == strlen(sch[a])) {
+                  if ((spc_xy_y >= num_xy_start_y && spc_xy_y <= num_xy_end_y) &&
+                      (spc_xy_x >= num_xy_x && spc_xy_x <= num_xy_x + 1)) {
+                    sum += tmp.value;
+                  }
+                }
+              }
+              else if (spc_xy_x == count) {
+                if (spc_xy_y - 1 >= 0 && spc_xy_y + 1 <= strlen(sch[a])) {
+                  if ((spc_xy_y >= num_xy_start_y - 1 && spc_xy_y <= num_xy_end_y + 1) &&
+                      (spc_xy_x >= num_xy_x - 1 && spc_xy_x <= num_xy_x)) {
+                    sum += tmp.value;
+                  }
+                }
+                else if (spc_xy_y == 0){
+                  if ((spc_xy_y >= num_xy_start_y && spc_xy_y <= num_xy_end_y + 1) &&
+                      (spc_xy_x >= num_xy_x - 1 && spc_xy_x <= num_xy_x)) {
+                    sum += tmp.value;
+                  }
+                }
+                else if (spc_xy_y == strlen(sch[a])) {
+                  if ((spc_xy_y >= num_xy_start_y - 1 && spc_xy_y <= num_xy_end_y) &&
+                      (spc_xy_x >= num_xy_x - 1 && spc_xy_x <= num_xy_x)) {
+                    sum += tmp.value;
+                  }
+                }
+              }
+            }
+          }
+        }
+        j = tmp.next_j;
+        
+      }
+    }
+  }
+
+  for (i = 0; i < count; i++) {
+    free(sch[i]);
+  }
+
+  fclose(readFile);
+
+  printf("||%d||\n", sum);
+}
